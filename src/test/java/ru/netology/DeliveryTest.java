@@ -2,7 +2,6 @@ package ru.netology;
 
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Configuration;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Keys;
 
@@ -18,36 +17,33 @@ public class DeliveryTest {
         return LocalDate.now().plusDays(days).format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
     }
 
-    @BeforeAll
-    static void setUpAll() {
-        // Настройки для стабильности в CI
-        Configuration.pageLoadTimeout = 60000;
-    }
-
     @Test
     void shouldTestSuccessfulFormSubmission() {
+
+        Configuration.headless = true;
+
         open("http://localhost:9999");
         String planningDate = generateDate(3);
 
-        // Город: вводим две буквы и выбираем из выпадающего списка (так надежнее)
-        $("[data-test-id='city'] input").setValue("Мо");
-        $$(".menu-item__control").find(Condition.text("Москва")).click();
+        // 1. Город - прямой ввод согласно Задаче №1
+        $("[data-test-id='city'] input").setValue("Москва");
 
-        // Дата: полная очистка
+        // 2. Дата - очистка и ввод
         $("[data-test-id='date'] input").sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
         $("[data-test-id='date'] input").setValue(planningDate);
 
-        // ФИО и Телефон
+        // 3. ФИО и Телефон
         $("[data-test-id='name'] input").setValue("Иван Иванов-Петров");
         $("[data-test-id='phone'] input").setValue("+79271234567");
 
-        // Согласие
+        // 4. Согласие (чекбокс)
         $("[data-test-id='agreement']").click();
 
-        // Отправка формы (ищем по тексту на кнопке)
+        // 5. Кнопка "Забронировать"
+        // Используем поиск по тексту кнопки, так как у нее может не быть data-test-id
         $$("button").find(Condition.text("Забронировать")).click();
 
-        // Проверка результата с запасом по времени
+        // 6. Проверка результата (ждем не более 15 секунд по условию)
         $("[data-test-id='notification']")
                 .shouldBe(Condition.visible, Duration.ofSeconds(15))
                 .shouldHave(Condition.text("Встреча успешно забронирована на " + planningDate));
