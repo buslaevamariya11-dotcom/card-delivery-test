@@ -48,4 +48,39 @@ public class DeliveryTest {
                 .shouldBe(Condition.visible, Duration.ofSeconds(15))
                 .shouldHave(Condition.text("Встреча успешно забронирована на " + planningDate));
     }
+
+    @Test
+    void shouldTestComplexElements() {
+        open("http://localhost:9999");
+
+        // 1. Город
+        $("[data-test-id='city'] input").setValue("Са");
+        $$(".menu-item__control").find(Condition.text("Самара")).click();
+
+        // 2. Дата через неделю
+        LocalDate targetDate = LocalDate.now().plusDays(7);
+        String day = String.valueOf(targetDate.getDayOfMonth());
+
+        $(".input__icon").click(); // Открываем календарь
+
+        // Логика переключения месяца
+        if (!LocalDate.now().getMonth().equals(targetDate.getMonth())) {
+            $("[data-step='1']").click();
+        }
+
+        // Выбор числа
+        $$("td.calendar__day").find(Condition.text(day)).click();
+
+        // 3. Остальные поля
+        $("[data-test-id='name'] input").setValue("Иван Иванов");
+        $("[data-test-id='phone'] input").setValue("+79271234567");
+        $("[data-test-id='agreement']").click();
+        $$("button").find(Condition.text("Забронировать")).click();
+
+        // 4. Проверка
+        String expectedDate = targetDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        $("[data-test-id='notification']")
+                .shouldBe(Condition.visible, Duration.ofSeconds(15))
+                .shouldHave(Condition.text("Встреча успешно забронирована на " + expectedDate));
+    }
 }
