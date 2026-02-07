@@ -29,10 +29,11 @@ public class DeliveryTest {
         open("http://localhost:9999");
         String planningDate = generateDate(3);
 
-        // Город
-        $("[data-test-id='city'] input").setValue("Москва");
+        // Город: вводим две буквы и выбираем из выпадающего списка (так надежнее)
+        $("[data-test-id='city'] input").setValue("Мо");
+        $$(".menu-item__control").find(Condition.text("Москва")).click();
 
-        // Дата: используем надежный метод очистки
+        // Дата: полная очистка
         $("[data-test-id='date'] input").sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
         $("[data-test-id='date'] input").setValue(planningDate);
 
@@ -43,10 +44,10 @@ public class DeliveryTest {
         // Согласие
         $("[data-test-id='agreement']").click();
 
-        // Отправка формы
-        $$("button").find(Condition.exactText("Забронировать")).click();
+        // Отправка формы (ищем по тексту на кнопке)
+        $$("button").find(Condition.text("Забронировать")).click();
 
-        // Проверка результата
+        // Проверка результата с запасом по времени
         $("[data-test-id='notification']")
                 .shouldBe(Condition.visible, Duration.ofSeconds(15))
                 .shouldHave(Condition.text("Встреча успешно забронирована на " + planningDate));
