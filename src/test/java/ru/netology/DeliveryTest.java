@@ -1,6 +1,8 @@
 package ru.netology;
 
 import com.codeborne.selenide.Condition;
+import com.codeborne.selenide.Configuration;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Keys;
 
@@ -14,6 +16,13 @@ public class DeliveryTest {
 
     public String generateDate(int days) {
         return LocalDate.now().plusDays(days).format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+    }
+
+    @BeforeAll
+    static void setUpAll() {
+        // Увеличиваем таймаут ожидания загрузки страницы,
+        // так как в CI это может занимать больше времени
+        Configuration.pageLoadTimeout = 60000;
     }
 
     @Test
