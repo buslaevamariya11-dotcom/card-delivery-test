@@ -20,21 +20,20 @@ public class DeliveryTest {
 
     @BeforeAll
     static void setUpAll() {
-        // Увеличиваем таймаут ожидания загрузки страницы,
-        // так как в CI это может занимать больше времени
+        // Настройки для стабильности в CI
         Configuration.pageLoadTimeout = 60000;
     }
 
     @Test
     void shouldTestSuccessfulFormSubmission() {
         open("http://localhost:9999");
-        String planningDate = generateDate(3); // Дата через 3 дня от текущей
+        String planningDate = generateDate(3);
 
         // Город
         $("[data-test-id='city'] input").setValue("Москва");
 
-        // Дата: очистка и ввод
-        $("[data-test-id='date'] input").sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
+        // Дата: используем надежный метод очистки
+        $("[data-test-id='date'] input").sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
         $("[data-test-id='date'] input").setValue(planningDate);
 
         // ФИО и Телефон
@@ -47,7 +46,7 @@ public class DeliveryTest {
         // Отправка формы
         $$("button").find(Condition.exactText("Забронировать")).click();
 
-        // Проверка результата с ожиданием 15 секунд
+        // Проверка результата
         $("[data-test-id='notification']")
                 .shouldBe(Condition.visible, Duration.ofSeconds(15))
                 .shouldHave(Condition.text("Встреча успешно забронирована на " + planningDate));
